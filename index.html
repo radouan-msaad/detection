@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Motion Radwan</title>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <!-- <link rel="stylesheet" href="bootstrap.min.css"/>
+   <script type="text/javascript" src="p5.js"></script>
+   <script type="text/javascript" src="p5.sound.js"></script>
+   <script tyqe="text/javascript" src="jquery.min.js"></script>
+   -->
+   <!--p5.js-->
+<script src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/p5.js"></script>
+<!--p5.sound.js-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.js" integrity="sha512-U2sgwrFhl+Tgx9iGH9h5Ba2WyIjyCes+D0prtIFw3a0V+/fkaeL5Cd/VjyPHno9kUPE1rnNhBGTyvtZsfJp0xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!--jquery.min.js v1-11-3-->
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<!--bootstrap.min.css-->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+   <style type="text/css">
+   .div{
+    background: black;
+    color: white;
+    font-size: 16px;
+    width:98%;
+   }
+   .btn{
+    height: 50px;
+    width: 150px;
+   } 
+    </style>
+</head>
+<script type="text/javascript">
+ let video;
+ let cnt=0;
+ let song;
+ var hd=0;
+ let i=0,h,w;
+ let f=0;
+ let start=0;
+ let tPx;
+ let rd=2;
+ let time=0;
+ let sensibiity=0;
+ tPx=new Array(3);
+  for(var q=0;q<3;q++){
+    tPx[q]=new Array(110*60+110);
+  }
+    $(document).ready(function(){
+    $("#time").change(function (){
+     $("#time-value").html($("#time").val());
+   });
+    $("#sensibility").change(function (){
+     $("#sensibility-value").html($("#sensibility").val());
+   });
+      $(window).keyup(function(e){
+       x=e.which||e.keyCode;
+       // alert(x);
+       if(x==83){
+        stop1();
+      }
+      if(x==32){
+        $(".demo").toggle();
+      }
+      if(x==13){
+        start1();
+      }
+      });
+      $('body').dblclick(function(){
+        if(hd==0)
+        hd=1;
+        else
+        hd=0
+      });
+      $(".start").click(function(){
+        if($(".start").val()=="start"){
+        $(".start").val("stop");
+        $(".start").toggleClass("btn-outline-danger");
+        start1();
+        }
+        else{
+          $(".start").val("start");
+          $(".start").toggleClass("btn-outline-danger");
+          stop1();
+        }
+     });
+    $(".camm").click(function(){
+
+     if($(".camm").val()=="front"){
+
+        $(".camm").val("back");
+        $(".camm").toggleClass("btn-outline-danger");
+        cam("user");
+        }
+        else{
+          $(".camm").val("front");
+          $(".camm").toggleClass("btn-outline-danger");
+          cam("environment");
+        }
+     });
+    });
+  function start1(){
+    stop1();
+    $(".div").css('background','green');
+   rd=0;
+  }
+
+  function stop1(){
+    $(".div").css('background','black');
+    start=2;
+    rd=2;
+    song.stop();
+
+    f=i=0;
+  }
+ function preload(){
+ song=loadSound('remix1.mp3');
+
+ }
+ function cam(env){
+     background(0);
+   drawingContext.clearRect(0,0,80,40);
+   createCanvas(600,495);
+   video.remove();
+   video = createCapture({ video: { facingMode: env } },);
+   video.size(380,450);
+   video.hide();
+ }
+ function setup(){
+   background(0);
+ createCanvas(600,495);
+  video = createCapture({ video: { facingMode: "environment" } },);
+ video.hide();
+ video.size(380,450);
+ }
+ function windowResized(){
+  resizeCanvas(windowWidth,windowHeight);
+}
+ function draw(){
+   h=20;
+   w=20;
+  time=($(".time").val()||2)*1000;
+  sensibiity=$(".sensibiity").val()||70;
+  cnt++;
+ 
+  image(video,0,0,h,w);
+  if(hd==0)
+  image(video,0,h,width,height);
+ else
+drawingContext.clearRect(0,0, width, height);
+  loadPixels();
+ 
+    if(rd==0&&video.loadedmetadata){
+      
+      console.log('ready!!');
+      setTimeout(function(){
+        if(rd==0){
+        rd=1;
+    for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+  
+    let px=get(x,y);
+    tPx[0][x+y*w]=px[0];
+    tPx[1][x+y*w]=px[1];
+    tPx[2][x+y*w]=px[2];
+    if(x+y*w==w*h-1){
+        console.log('date saved.');
+        start=1;
+      $(".div").css('background','red');
+       }
+    }}}
+  },time);
+    
+   }
+  if(video.loadedmetadata&&start==1){
+     for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+    let px=get(x,y);
+
+    if(px[0]>tPx[0][x+y*w]-sensibiity&&px[0]<tPx[0][x+y*w]+sensibiity&&px[1]>tPx[1][x+y*w]-sensibiity&&px[1]<tPx[1][x+y*w]+sensibiity&&px[2]>tPx[2][x+y*w]-sensibiity&&px[2]<tPx[2][x+y*w]+sensibiity)
+    {
+         f++;
+    
+   if(song.isPlaying()){
+      if(f>=((20000*sensibiity)/50)){
+        console.log(f);
+      i=0;
+      song.pause();
+      console.log('pause');
+   }
+  }
+    }
+    else{
+        f=0;
+      if(i==0){
+         if(song.isPlaying());
+         else{
+         song.play();
+         console.log('play');
+          }
+        }
+     fill(250,0,0);
+     noStroke();
+     let X = map(x,0,w,0,width);
+     let Y = map(y,0,h,h,height);
+     if(hd==0)
+     rect(X,Y,10,10);
+     rect(x,y,1,1);
+     i++;
+      }
+  }
+  }
+ }
+}
+</script>
+<body>
+  <div class="form-group div p-2">
+    <div class="row m-2">
+   <div class="col">
+    <label for="">&nbsp Time (S): &nbsp</label>
+  <div id="time-value" class="badge float-right">2</div>
+  <input type="range" id="time" class="form-range" min="2" max="60" value="2" step="1"></div>
+<div class="col">
+  <label for="">&nbsp Sensibility: &nbsp</label>
+ <div id="sensibility-value" class="badge float-right">50</div>
+  <input type="range" id="sensibility" class="form-range" min="10" max="120" value="50" step="1">
+    </div>
+  </div>
+  <div class="row m-2">
+    <div class="col">
+  <input type="button" class="btn btn-success start" value="start"></div>
+  <div class="col">
+   <input type="button" class="btn btn-warning camm" value="front">
+  </div>
+ </div>
+  </div>
+  <div class="demo"></div>
+</body>
+</html>
